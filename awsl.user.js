@@ -103,8 +103,46 @@
     await recreateButtonsV6(buttonBar, textarea, submit);
   }
 
+  async function recreateButtonsV7(buttonBar, textarea, submit) {
+    for (const btn of buttonBar.querySelectorAll('.awsl-button')) {
+      btn.remove();
+    }
+
+    const buttons = [];
+    const words = await getValue('words', DEFAULT_WORDS);
+    for (const word of words.split(';').filter(t => !!t).slice(0, MAX_WORDS)) {
+      const button = document.createElement('button');
+      button.className = 'woo-button-main woo-button-flat woo-button-default woo-button-m woo-button-round';
+      button.style = 'margin-right: 8px;';
+      button.innerHTML = `
+        <span class="woo-button-wrap">
+          <span class="woo-button-content">${word}</span>
+        </span>
+      `;
+      button.title = word;
+      button.addEventListener('click', () => {
+      });
+      buttons.push(button);
+      buttonBar.insertBefore(button, submit);
+    }
+  }
+
+  async function handleDocumentChangesV7() {
+    for (const feedBox of document.querySelectorAll('[class*="Feed_box_"]:not([awsl="yes"])')) {
+      const textarea = feedBox.querySelector('textarea[class*="Form_input_"]');
+      const buttonBar = feedBox.querySelector('[class*="Composer_mar1_"] .woo-box-flex');
+      const submit = feedBox.querySelector('[class*="Composer_btn_"]');
+      if (!textarea || !buttonBar || !submit) return;
+
+      feedBox.setAttribute('awsl', 'yes');
+
+      await recreateButtonsV7(buttonBar, textarea, submit);
+    }
+  }
+
   const observer = new MutationObserver(() => {
     handleDocumentChangesV6();
+    handleDocumentChangesV7();
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
